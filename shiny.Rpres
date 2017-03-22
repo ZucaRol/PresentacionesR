@@ -1,0 +1,26 @@
+Shiny
+========================================================
+author: Edson Rolando Tamayo Castaneda
+date: 27-03-2017
+autosize: true
+
+Que es shiny?
+========================================================
+
+-Es un paquete de R que facilita la creación de apliaciones web interactivas.
+-Un entorno de desarrollo web desde R.
+-Una errameinta para la visualicacion de manera amigable con el usuario.
+
+Slide With Code
+========================================================
+
+```{r}
+summary(cars)
+```
+
+Slide With Plot
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```

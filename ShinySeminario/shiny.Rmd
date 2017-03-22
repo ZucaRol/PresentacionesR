@@ -1,0 +1,251 @@
+---
+title: "Implementación de un sistema de indicadores en una ShinyApp"
+author: "Edson Rolando Tamayo Castañeda"
+date: "24 de marzo de 2017"
+output: ioslides_presentation
+runtime: shiny
+---
+
+## Introducción
+
+<p style="text-align: justify;"> En la actualidad el uso HTML, JavaScript y CSS para generar reportes interactivos, acompañados datos tabulados, gráficas y notas explicativas dinámicas, para la publicación de resultados estadísticos se ha convertido en una herramienta atractiva. Teniendo entre otras ventajas, sobre los reportes escritos pdf, el mantenerse actualizados ya que si se modifica la base de datos también se modifica el reporte.</p>
+
+<img src="HTML5_CSS_JavaScript.png" style="width: 400px;"/>
+
+## Introducción
+
+<h3>Inconvenientes:</h3>
+
+- <p style="text-align: justify;">Es necesario tener conocimiento sobre los lenguajes de programación HTML, JavaScript y CSS.</p>
+- <p style="text-align: justify;">JavaScript el lenguaje de programación web no esta especializado en el análisis estadístico por lo que dificulta la generación de los reportes.</p>
+
+### Solución:
+
+- Combinar HTML, JavaScript y CSS con R=Shiny.
+
+<img src="HTML5_CSS_JavaScript_R.png" style="width: 400px;"/>
+
+## Shiny
+
+<p style="text-align: justify;"> Shiny es un paquete de R que permite crear aplicaciones web, sin necesidad de conocer los lenguajes de programación World Wide Web</p>
+
+<p style="text-align: justify;"> Permite un análisis flexible e interactivo de los resultados, con esto se quiere decir que el usuario no solo puede ver los reportes (gráficas, tablas, mapas, etc), mas aún el usuario puede modificaros, introduciendo nuevos datos, texto, seleccionando rangos, entre otros input o entradas, que por medio de widgets shiny permite al usuario comunicarse con el servidor.</p>
+
+
+## Creación de una ShinyApp Basica.
+
+### Instalación
+
+- R 3.3.3 [descargar](https://cran.r-project.org)
+- Rstudio [descargar](https://www.rstudio.com/products/rstudio/download)
+- Instalar Shiny
+
+```{r insShiny}
+#install.packages("shiny")
+library(shiny)
+
+#Partes basicas de una ShinyApp
+ui<-shinyUI(fluidPage())
+server<-shinyServer(function(input,output){})
+```
+
+
+## La interfaz de usuario (UI)
+
+<p style="text-align: justify;"> Controla apariencia de la app. Por lo general se guarda en un script llamado ui.R, a continuación el ui del ejemplo Hola shiny</p>
+
+```{r UI}
+ui<-shinyUI(fluidPage(
+
+  titlePanel("Hola Shiny!"),
+
+  # Crear una pagina con una barra lateral
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("barras", "Numero de barras:", min = 1,
+                  max = 50,
+                  value = 30)),
+
+    # Mostrar la grafica de la distrubucion generada
+    mainPanel(plotOutput("distPlot") ))
+  ))
+```
+
+## El servidor: Server
+<p style="text-align: justify;"> Contiene las instrucciones que la maquina necesita para construir la app. Especifica el código funcional detrás del ui.</p>
+```{r server}
+server<-shinyServer(function(input, output) {
+  # Codigo para generar un histogram. El codigo esta dentro de 
+  # de la función renderPlot para indicar que:
+  #
+  #  1) Es "rectivo", esto es se debe ejecutar automaticamente
+  #     cada vez que una entrda cambie.
+  #  2) Genera una slida de tipo plot (gráfica)
+
+  output$distPlot <- renderPlot({
+    x    <- faithful[, 2]  # Datos de Old Faithful Geyser
+    barras <- seq(min(x), max(x), length.out = input$barras + 1)
+
+    # Crea un istograma con el numero de barras especificado.
+    hist(x, breaks = barras, col = 'darkgray', border = 'white')
+  })
+})
+```
+
+## Ejemplo 1: Hola Shiny
+```{r, echo=FALSE}
+  # Titulo de la aplicción
+  titlePanel("Hola Shiny!")
+
+  # Crear una pagina con una barra lateral
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("barras", "Numero de barras:", min = 1,
+                  max = 50,
+                  value = 30)),
+
+    # Mostrar la grafica de la distrubucion generada
+    mainPanel(plotOutput("distPlot") ))
+
+output$distPlot <- renderPlot({
+    x    <- faithful[, 2]  # Datos de Old Faithful Geyser
+    barras <- seq(min(x), max(x), length.out = input$barras + 1)
+
+    # Crea un istograma con el numero de barras especificado.
+    hist(x, breaks = barras, col = 'darkgray', border = 'white')
+  })
+```
+
+## El UI depende del server
+```{r, include=FALSE}
+textInput("text", label = "Entrada de texto", 
+        value = "Titulo")
+```
+
+```{r, echo=FALSE}
+  # Titulo de la aplicción
+  titlePanel("Hola Shiny!")
+
+  # Crear una pagina con una barra lateral
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("baras", "Numero de barras:", min = 1,
+                  max = 50,
+                  value = 30),
+      
+      textInput("tex", label ="Entrada de texto", 
+        value = "Enter text...")),
+
+    # Mostrar la grafica de la distrubucion generada
+    mainPanel(plotOutput("distPlo") ))
+
+output$distPlo<- renderPlot({
+    x2    <- faithful[, 2]  # Datos de Old Faithful Geyser
+    baras <- seq(min(x2), max(x2), length.out = input$baras + 1)
+
+    # Crea un istograma con el numero de barras especificado.
+    hist(x2, breaks = baras, col = 'darkgray', border = 'white')
+  })
+```
+
+## El UI depende del server
+```{r, include=FALSE}
+# Crea un istograma con el numero de barras especificado.
+   # hist(x, breaks = barras,main=input$text, col = 'darkgray', border = 'white')
+```
+
+
+```{r, echo=FALSE}
+  # Titulo de la aplicción
+  titlePanel("Hola Shiny!")
+
+  # Crear una pagina con una barra lateral
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("baras2", "Numero de barras:", min = 1,
+                  max = 50,
+                  value = 30),
+      
+      textInput("tex2", label ="Entrada de texto", 
+        value = "Titulo")),
+
+    # Mostrar la grafica de la distrubucion generada
+    mainPanel(plotOutput("distPlo2") ))
+
+output$distPlo2<- renderPlot({
+    x3    <- faithful[, 2]  # Datos de Old Faithful Geyser
+    baras2 <- seq(min(x3), max(x3), length.out = input$baras2 + 1)
+
+    # Crea un istograma con el numero de barras especificado.
+    hist(x3, breaks = baras2,main=input$tex2, col = 'darkgray', border = 'white')
+  })
+```
+
+## Widgets de entrada basicos.
+```{r, echo=FALSE}
+  fluidRow(
+    
+    column(3,
+      h4("Botones"),
+      actionButton("action", label = "Accion"),
+      br(),
+      submitButton("Enviar")),
+    
+    column(3,
+      h4("Caja de selecion"),
+      checkboxInput("checkbox", label = "Eleccion A", value = TRUE)),
+    
+    column(3, 
+      checkboxGroupInput("checkGroup", 
+        label = h4("Caja de seleccion multiple"), 
+        choices = list("Eleccion 1" = 1, 
+           "Eleccion 2" = 2, "Eleccion 3" = 3),
+        selected = 1)),
+    
+    column(3, 
+      dateInput("date", 
+        label = h4("Entrada de fecha"), 
+        value = "2014-01-01"))   
+  )
+  
+  fluidRow(
+    
+    column(3,
+      dateRangeInput("dates", label = h4("Rango de fecha"))),
+    
+    column(3,
+      fileInput("file", label = h4("Carga de archivos"))),
+    
+    
+    column(3, 
+      numericInput("num", 
+        label = h4("Entrada numerica"), 
+        value = 1))   
+  )
+    
+  fluidRow(
+    
+    column(3,
+      radioButtons("radio", label = h4("Botones de seleccion"),
+        choices = list("Eleccion 1" = 1, "Eleccion 2" = 2,
+                       "Eleccion 3" = 3),selected = 1)),
+    
+    column(3,
+      selectInput("select", label = h4("Caja de seleccion"), 
+        choices = list("Eleccion 1" = 1, "Eleccion 2" = 2,
+                       "Eleccion 3" = 3), selected = 1)),
+    
+    column(3, 
+      sliderInput("slider1", label = h4("Barras desplazadoras"),
+        min = 0, max = 100, value = 50),
+      sliderInput("slider2", "",
+        min = 0, max = 100, value = c(25, 75))
+      ),
+    
+    column(3, 
+      textInput("text", label = h4("Entrada de texto"), 
+        value = "Enter text..."))   
+  )
+
+```
+
